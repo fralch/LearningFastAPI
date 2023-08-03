@@ -7,7 +7,7 @@ app = FastAPI()
 #Routers
 app.include_router(users.router)
 app.include_router(products.router)
-app.mount("/imagenes", StaticFiles(directory="static"), name="static") #para que se vean las imagenes la ruta es: http://localhost:8000/imagenes/
+app.mount("/estaticos", StaticFiles(directory="static"), name="static") #para que se vean las imagenes la ruta es: http://localhost:8000/imagenes/
 
 
 @app.get("/")
