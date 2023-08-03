@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-router = APIRouter()
+router = APIRouter( tags=["items"]  )
 
 
 # Path; "http://localhost:8000/items/1"

@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
-from routers import users
+from routers import users, products
 
 app = FastAPI()
 
 #Routers
 app.include_router(users.router)
+app.include_router(products.router)
 
 @app.get("/")
 async def root():
