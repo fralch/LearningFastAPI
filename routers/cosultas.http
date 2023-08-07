@@ -1,0 +1,15 @@
+POST http://127.0.0.1:8000/login
+Accept: */*
+Content-Type: multipart/form-data; boundary=---011000010111000001101001
+Host: 127.0.0.1:8000
+Content-Length: 212
+
+-----011000010111000001101001
+Content-Disposition: form-data; name="username"
+
+alice
+-----011000010111000001101001
+Content-Disposition: form-data; name="password"
+
+secret
+-----011000010111000001101001--
