@@ -56,6 +56,14 @@ def search_user(username: str):
         return user_instance
     return None
 
+async def get_current_user(token: str = Depends(oauth2)):
+    token_data = jwt.decode(token, SECRET, algorithms=[hash]) #decodifica el token
+    username = token_data["username"] #obtiene el nombre de usuario del token
+
+    user = search_user(username)
+    if not user:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado", headers={"WWW-Authenticate": "Bearer"})
+    return user
 
 @app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -76,3 +84,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     to_encode = {"exp": expire, "username": user.username} #creamos un diccionario con la fecha de expiracion y el nombre de usuario    
 
     return {"access_token": jwt.encode(to_encode, SECRET, algorithm=hash), "token_type": "bearer"}
+
+@app.get("/users/me")
+async def read_user_me(current_user: User = Depends(get_current_user)):
+    return current_user
