@@ -3,8 +3,13 @@ from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
 
-Hash = "HS256" #para encriptar el token que se devuelve al usuario
+hash = "HS256" #para encriptar el token que se devuelve al usuario
+access_token_expire_minutes = 1 #tiempo de expiracion del token
+SECRET = "mysecret" #clave secreta para encriptar el token
+
+
 
 crypt_context = CryptContext(schemes=["bcrypt"]) #para encriptar la contraseña del usuario
 
@@ -52,6 +57,7 @@ def search_user(username: str):
     return None
 
 
+@app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = search_user(form_data.username)
     if not user:
@@ -62,6 +68,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not crypt_context.verify(form_data.password, user.password): #verifica que la contraseña ingresada sea la misma que la de la base de datos
         raise HTTPException(status_code=400, detail="Contraseña incorrecta")
     
+    # Generamos el token de acceso
+    access_token_expires = timedelta(minutes=access_token_expire_minutes ) 
 
+    expire = datetime.utcnow() + access_token_expires # datetime.utcnow() devuelve la fecha y hora actuales en UTC
 
-    return {"access_token": user.username, "token_type": "bearer"}
+    to_encode = {"exp": expire, "username": user.username} #creamos un diccionario con la fecha de expiracion y el nombre de usuario    
+
+    return {"access_token": jwt.encode(to_encode, SECRET, algorithm=hash), "token_type": "bearer"}
