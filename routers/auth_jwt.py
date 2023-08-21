@@ -11,7 +11,7 @@ SECRET = "mysecret" #clave secreta para encriptar el token
 
 
 
-crypt_context = CryptContext(schemes=["bcrypt"]) #para encriptar la contraseña del usuario
+crypt_context = CryptContext(schemes=["bcrypt"]) #para verificar la contraseña ingresada por el usuario con la contraseña almacenada en la base de datos
 
 
 app = FastAPI()
@@ -88,3 +88,20 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.get("/users/me")
 async def read_user_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+"""
+Los pasos para entender el funcionamiento de la autenticación JWT son los siguientes:
+
+1. El usuario envía su nombre de usuario y contraseña al servidor.
+2. El servidor verifica si el usuario existe en la base de datos.
+3. El servidor verifica si la contraseña ingresada por el usuario coincide con la contraseña almacenada en la base de datos.
+    - from passlib.context import CryptContext: desencrypta la contraseña almacenada en la base de datos y la compara con la contraseña ingresada por el usuario.
+4. Si la contraseña es correcta, el servidor genera un token de acceso y lo devuelve al usuario.
+5. El usuario almacena el token de acceso y lo envía en cada solicitud al servidor.
+6. El servidor verifica si el token de acceso es válido y, si es así, devuelve los datos solicitados al usuario.
+    - from jose import JWTError, jwt: decodifica el token de acceso y verifica que no haya expirado.
+
+
+
+"""
