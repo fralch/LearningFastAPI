@@ -1,20 +1,31 @@
 from fastapi import APIRouter, HTTPException
 from db.models.user import UserModel as User
+from db.schemas.user_schema import user_schema, users_schema
 from db.cliente import db_client
 
 router = APIRouter( prefix="/user_db", tags=["users_db"]  )
 
+def get_user(username: str):
+    user = db_client.local.users.find_one({"username": username})
+    if user:
+        return user
+    else:
+        return False
 
 
-
-@router.get("/")
-async def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+@router.get("/", response_model=list[User])
+async def users():
+    users = db_client.local.users.find()
+    return users_schema(users)
 
 
 @router.post("/") 
 async def create_user(user: User):
-    # return user.dict()
+    user_exist = get_user(user.username)
+    if user_exist:
+        raise HTTPException(status_code=400, detail="El usuario ya existe")
+    
+
     user_dict = dict(user)
     del user_dict["id"]
     id = db_client.local.users.insert_one(user_dict).inserted_id
@@ -47,8 +58,9 @@ async def create_user(user: User):
     return new_user
 
 @router.put("/{id}")
-async def update_item(item_id: int, item: str):
-    raise HTTPException(status_code=204, detail="Item ")
+async def update_item(id: str, user: User):
+    return False
+    
 
 @router.patch("/{id}")
 async def update_item(item_id: int, item: str):
