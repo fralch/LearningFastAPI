@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from db.models.user import UserModel as User
 from db.schemas.user_schema import user_schema, users_schema
 from db.cliente import db_client
+from bson import ObjectId
 
 router = APIRouter( prefix="/user_db", tags=["users_db"]  )
 
@@ -17,6 +18,14 @@ def get_user(username: str):
 async def users():
     users = db_client.local.users.find()
     return users_schema(users)
+
+@router.get("/{id}",  response_model=User )
+async def user(id: str):
+    user = db_client.local.users.find_one({"_id": ObjectId(id)})
+    if user:
+        return user_schema(user)
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 @router.post("/") 
