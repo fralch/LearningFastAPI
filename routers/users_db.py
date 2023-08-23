@@ -66,16 +66,26 @@ async def create_user(user: User):
 
     return new_user
 
+
 @router.put("/{id}")
 async def update_item(id: str, user: User):
-    return False
+    user_without_id = dict(user)
+    del user_without_id["id"]
+    updated_user = db_client.local.users.update_one({"_id": ObjectId(id)}, {"$set": user_without_id})
+    if updated_user.modified_count == 1:
+        user = db_client.local.users.find_one({"_id": ObjectId(id)})
+        return user_schema(user)
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     
 
-@router.patch("/{id}")
-async def update_item(item_id: int, item: str):
-    return {"item_name": item.name, "item_id": item_id}
-
 @router.delete("/{id}")
-async def delete_item(item_id: int):
-    return {"item_id": item_id}
+async def delete_item(id : str):
+    borrardo = db_client.local.users.delete_one({"_id": ObjectId(id)})
+    if borrardo.deleted_count == 1:
+        return {"message": "User deleted"}
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+
 
